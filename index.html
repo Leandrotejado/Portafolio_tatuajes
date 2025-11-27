@@ -28,12 +28,69 @@
             --neon-pink: #ff69b4;
         }
 
+        html {
+            height: 100%;
+        }
+
+        /* Zoom global preferente + fallback
+           - En Chromium/Edge/Chrome se usará `zoom` para que el layout real se reduzca (footer funciona correctamente).
+           - En navegadores que no soportan `zoom` (ej. Firefox) se aplica .scale-wrapper con transform y se compensa el ancho/alto.
+        */
+        :root { --site-zoom: 0.67; }
+
+        @supports (zoom: 1) {
+            body {
+                zoom: var(--site-zoom);
+            }
+        }
+
+        @supports not (zoom: 1) {
+            .scale-wrapper {
+                transform: scale(var(--site-zoom));
+                transform-origin: 0 0;
+                width: calc(100% / var(--site-zoom));
+                min-height: calc(100vh / var(--site-zoom));
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            /* En navegadores sin zoom, aseguramos que el contenedor del reel y el video también se reduzcan
+               para evitar que el padding-bottom u otras reglas los mantengan grandes. */
+            .reel-wrapper,
+            .reel-container,
+            .reel-container video {
+                transform: scale(var(--site-zoom));
+                transform-origin: top center;
+                width: calc(100% / var(--site-zoom));
+                /* Evitar overflow inesperado al escalar */
+                display: block;
+            }
+        }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, #1a0d13 0%, #2d1823 50%, #1a0d13 100%);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: var(--text-light);
             overflow-x: hidden;
             min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main content wrapper */
+        body > header,
+        body > section {
+            position: relative;
+            z-index: 2;
+        }
+
+        body > footer {
+            position: relative;
+            z-index: 2;
+            margin-top: auto;
         }
 
         /* Animaciones */
@@ -77,23 +134,43 @@
             }
         }
 
-        /* Header */
+        /* Header - Enhanced */
         .header {
-            padding: 2rem;
+            padding: 3rem 2rem;
             text-align: center;
             animation: fadeInUp 1s ease;
             position: relative;
+            background: transparent;
+            z-index: 1;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(212, 96, 140, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 6s ease-in-out infinite;
+            pointer-events: none;
         }
 
         .logo-container {
-            width: 150px;
-            height: 150px;
+            width: 180px;
+            height: 180px;
             margin: 0 auto 2rem;
             border-radius: 50%;
             background: var(--gradient-pink);
-            padding: 3px;
+            padding: 4px;
             animation: pulse 3s infinite;
-            box-shadow: 0 0 30px rgba(212, 96, 140, 0.5);
+            box-shadow: 0 0 40px rgba(212, 96, 140, 0.6),
+                        0 0 80px rgba(212, 96, 140, 0.3),
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
         }
 
         .logo {
@@ -101,43 +178,70 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--primary-dark);
+            border: 4px solid var(--primary-dark);
         }
 
         h1 {
             font-family: 'Permanent Marker', cursive;
-            font-size: 4rem;
+            font-size: 4.5rem;
             margin-bottom: 1rem;
             background: var(--gradient-pink);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 2px 2px 4px rgba(240, 224, 224, 0.8), 
-                        4px 4px 8px rgba(0, 0, 0, 0.6);
-            letter-spacing: 3px;
+            text-shadow: none;
+            letter-spacing: 4px;
             text-transform: uppercase;
-        }
-        .tagline {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.5rem;
-            color: var(--light-pink);
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: 300;
+            position: relative;
+            z-index: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-smooth: always;
         }
 
-        /* Experience Badge */
+        .tagline {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.6rem;
+            color: var(--light-pink);
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5),
+                         0 0 20px rgba(212, 96, 140, 0.3);
+        }
+
+        /* Experience Badge - Enhanced */
         .experience-badge {
             display: inline-block;
             background: var(--gradient-pink);
             color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
             margin-bottom: 2rem;
             font-family: 'Bebas Neue', cursive;
-            font-size: 1.3rem;
-            letter-spacing: 2px;
+            font-size: 1.4rem;
+            letter-spacing: 3px;
             animation: pulse 2s infinite;
+            box-shadow: 0 5px 20px rgba(212, 96, 140, 0.5),
+                        0 0 30px rgba(212, 96, 140, 0.3),
+                        inset 0 2px 5px rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+        }
+
+        .experience-badge i {
+            margin: 0 0.5rem;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* Social Links */
@@ -173,7 +277,7 @@
             box-shadow: 0 10px 30px rgba(212, 96, 140, 0.5);
         }
 
-        /* About Section */
+        /* About Section - Enhanced */
         .about {
             max-width: 900px;
             margin: 0 auto 4rem;
@@ -183,6 +287,20 @@
             background: rgba(45, 24, 35, 0.5);
             border-radius: 20px;
             backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 96, 140, 0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
         }
 
         .about h2 {
@@ -192,27 +310,61 @@
             font-size: 2.5rem;
             letter-spacing: 3px;
             text-transform: uppercase;
+            position: relative;
+            z-index: 1;
         }
 
         .about-content {
             display: grid;
             gap: 1.5rem;
             text-align: left;
+            position: relative;
+            z-index: 1;
         }
 
         .about-item {
-            padding: 1rem;
-            background: rgba(212, 96, 140, 0.1);
-            border-left: 3px solid var(--accent-pink);
-            border-radius: 5px;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.1) 0%, rgba(139, 58, 98, 0.05) 100%);
+            border-left: 4px solid var(--accent-pink);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 96, 140, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .about-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(212, 96, 140, 0.2);
+        }
+
+        .about-item:hover::before {
+            left: 100%;
         }
 
         .about-item h3 {
             font-family: 'Oswald', sans-serif;
             color: var(--light-pink);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             font-size: 1.3rem;
             text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        .about-item h3 i {
+            color: var(--accent-pink);
+            margin-right: 0.5rem;
         }
 
         .about p {
@@ -220,6 +372,8 @@
             font-size: 1.1rem;
             color: var(--text-light);
             font-weight: 300;
+            position: relative;
+            z-index: 1;
         }
 
         .skills {
@@ -239,12 +393,16 @@
             text-transform: uppercase;
         }
 
-        /* Featured Reel */
+        /* Featured Reel with Collage Background */
+        /* ═══════════════════════════════════════════════════════════
+           📹 TAMAÑO DEL VIDEO - Ajusta aquí para hacerlo más grande
+           ═══════════════════════════════════════════════════════════ */
         .featured-reel {
-            max-width: 500px;
+            max-width: 1400px; /* 🔧 CAMBIA ESTE VALOR para hacer el video más grande (ej: 600px, 700px, 800px) */
             margin: 0 auto 4rem;
             padding: 2rem;
             animation: fadeInUp 1s ease 0.5s both;
+            position: relative;
         }
 
         .featured-reel h2 {
@@ -257,6 +415,248 @@
             text-transform: uppercase;
         }
 
+        .reel-wrapper {
+            position: relative;
+            max-width: 1400px; /* 🔧 CAMBIA ESTE VALOR también para que coincida con el de arriba */
+            margin: 0 auto;
+            z-index: 2;
+            overflow: visible;
+        }
+
+        /* Forzar que el video y su contenedor no ocupen toda la pantalla
+           y se muestren más pequeños independientemente del soporte de `zoom`.
+           Cambia 600px por el ancho deseado (ej. 500, 700). */
+        .reel-wrapper, .reel-container {
+            width: 100%;
+            max-width: 450px !important;
+            margin: 0 auto !important;
+        }
+
+        .reel-background {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1700px;
+            height: 100%;
+            max-width: 90vw;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+            perspective: 2500px;
+            perspective-origin: center center;
+        }
+
+        .collage-carousel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            animation: rotate3D 50s linear infinite;
+            will-change: transform;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           📍 POSICIÓN VERTICAL DE LOS COLLAGES
+           ═══════════════════════════════════════════════════════════ */
+        .collage-carousel.carousel-top {
+            top: 10%; /* 🔧 CAMBIA ESTE VALOR para mover el collage superior arriba/abajo (ej: 5% más arriba, 15% más abajo) */
+        }
+
+        .collage-carousel.carousel-center {
+            top: 50%; /* 🔧 CAMBIA ESTE VALOR para mover el collage del centro arriba/abajo (ej: 45% más arriba, 55% más abajo) */
+        }
+
+        .collage-carousel.carousel-bottom {
+            top: 90%; /* 🔧 CAMBIA ESTE VALOR para mover el collage inferior arriba/abajo (ej: 85% más arriba, 95% más abajo) */
+        }
+
+        @keyframes rotate3D {
+            0% {
+                transform: translate(-50%, -50%) rotateY(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotateY(360deg);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           📏 TAMAÑO DE LAS FOTOS DEL COLLAGE
+           ═══════════════════════════════════════════════════════════ */
+        .collage-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 160px; /* 🔧 CAMBIA ESTE VALOR para hacer las fotos más anchas (ej: 180px, 200px) */
+            height: 200px; /* 🔧 CAMBIA ESTE VALOR para hacer las fotos más altas (ej: 220px, 240px) */
+            transform-style: preserve-3d;
+            opacity: 0.85;
+        }
+
+        @media (min-width: 768px) {
+            .collage-item {
+                width: 170px; /* 🔧 Tamaño para tablets - haz más grande aquí también */
+                height: 210px; /* 🔧 Tamaño para tablets - haz más grande aquí también */
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .collage-item {
+                width: 180px; /* 🔧 Tamaño para pantallas grandes - haz más grande aquí también */
+                height: 220px; /* 🔧 Tamaño para pantallas grandes - haz más grande aquí también */
+            }
+        }
+
+        .collage-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            filter: grayscale(10%) brightness(1.05);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            border: 3px solid rgba(212, 96, 140, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6),
+                        0 0 40px rgba(212, 96, 140, 0.3);
+            pointer-events: auto;
+            backface-visibility: hidden;
+            transform-origin: center;
+        }
+
+        .collage-img:hover {
+            filter: grayscale(0%) brightness(1.2);
+            transform: scale(1.15) !important;
+            border-color: var(--accent-pink);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8),
+                        0 0 60px rgba(212, 96, 140, 0.5);
+            z-index: 10;
+        }
+
+        /* Modal for collage images */
+        .collage-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 13, 19, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .collage-modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .collage-modal-content {
+            background: linear-gradient(135deg, var(--secondary-dark), var(--primary-dark));
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid var(--accent-pink);
+            box-shadow: 0 10px 40px rgba(212, 96, 140, 0.4);
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .collage-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .collage-modal-close:hover {
+            background: rgba(212, 96, 140, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .collage-modal h3 {
+            font-family: 'Bebas Neue', cursive;
+            color: var(--accent-pink);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .collage-modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .collage-modal-btn {
+            padding: 1rem 2rem;
+            background: var(--gradient-pink);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: 'Oswald', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(212, 96, 140, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .collage-modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 96, 140, 0.5);
+        }
+
+        .collage-modal-btn.instagram {
+            background: linear-gradient(135deg, #E1306C, #C13584);
+        }
+
+        .collage-modal-btn.maps {
+            background: linear-gradient(135deg, #4285F4, #34A853);
+        }
+
         .reel-container {
             position: relative;
             padding-bottom: 177.78%;
@@ -265,6 +665,7 @@
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(212, 96, 140, 0.3);
             background: var(--secondary-dark);
+            z-index: 2;
         }
 
         .reel-container video {
@@ -275,9 +676,11 @@
             height: 100%;
             object-fit: cover;
             border-radius: 20px;
+            z-index: 2;
+            mix-blend-mode: normal;
         }
 
-        /* Gallery */
+        /* Gallery - Simplified for Mobile */
         .gallery {
             max-width: 1200px;
             margin: 0 auto;
@@ -288,8 +691,8 @@
             font-family: 'Bebas Neue', cursive;
             text-align: center;
             color: var(--accent-pink);
-            margin-bottom: 3rem;
-            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
             animation: fadeInUp 1s ease 0.7s both;
             letter-spacing: 3px;
             text-transform: uppercase;
@@ -297,31 +700,39 @@
 
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
             animation: fadeInUp 1s ease 0.9s both;
         }
 
         .gallery-item {
             position: relative;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            background: var(--secondary-dark);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            background: #1a0d13;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
-        
+            aspect-ratio: 2 / 3;
+            display: block;
         }
 
         .gallery-item:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(212, 96, 140, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(212, 96, 140, 0.4);
+        }
+
+        .gallery-item:active {
+            transform: translateY(-2px) scale(0.98);
         }
 
         .gallery-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+            background: #1a0d13;
+            object-position: center;
         }
 
         .gallery-placeholder {
@@ -363,10 +774,17 @@
 
         /* Map Section */
         .location {
-            max-width: 1000px;
+            max-width: 1600px;
             margin: 4rem auto;
             padding: 2rem;
             animation: fadeInUp 1s ease 1.1s both;
+        }
+
+        .location-container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
         }
 
         .location h2 {
@@ -383,57 +801,444 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(212, 96, 140, 0.3);
-            height: 400px;
+            height: 100%;
+            min-height: 500px;
             background: var(--secondary-dark);
-            margin-bottom: 2rem;
         }
 
         .location-info {
-            background: rgba(45, 24, 35, 0.5);
-            border-radius: 15px;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            text-align: center;
+            background: linear-gradient(135deg, rgba(45, 24, 35, 0.95), rgba(26, 13, 19, 0.98));
+            border-radius: 25px;
+            padding: 3.5rem;
+            backdrop-filter: blur(20px);
+            text-align: left;
+            border: 2px solid rgba(212, 96, 140, 0.3);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4),
+                        0 0 30px rgba(212, 96, 140, 0.2);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .location-info h3 {
-            font-family: 'Oswald', sans-serif;
+            text-align: center;
+        }
+
+        .location-info::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 96, 140, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Nuevo estilo para el header del estudio */
+        .studio-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(212, 96, 140, 0.4);
+        }
+
+        .studio-header i {
+            font-size: 2.5rem;
+            color: var(--accent-pink);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .studio-header h3 {
+            font-family: 'Bebas Neue', cursive;
             color: var(--light-pink);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8),
+                         0 0 15px rgba(212, 96, 140, 0.3);
+            font-weight: 400;
+            margin: 0;
+        }
+
+        /* Contenedor de detalles */
+        .studio-details {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Bloques de detalle */
+        .detail-block {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.12) 0%, rgba(139, 58, 98, 0.08) 100%);
+            border-radius: 15px;
+            border-left: 4px solid var(--accent-pink);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 96, 140, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .detail-block:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(212, 96, 140, 0.2);
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.18) 0%, rgba(139, 58, 98, 0.12) 100%);
+        }
+
+        .detail-block:hover::before {
+            left: 100%;
+        }
+
+        .detail-block p {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            line-height: 1.6;
+        }
+
+        .detail-block i {
+            color: var(--accent-pink);
+            font-size: 1.4rem;
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        /* Bloque de dirección */
+        .address-block {
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.15) 0%, rgba(139, 58, 98, 0.1) 100%);
+            border-left: 4px solid var(--accent-pink);
+            border-right: 4px solid var(--accent-pink);
+        }
+
+        .address-block p {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.4rem;
+            color: var(--light-pink);
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        .location-info p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--text-light);
+        /* Bloques de horarios */
+        .hours-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        .location-info .address {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 1.3rem;
-            color: var(--accent-pink);
-            margin: 1rem 0;
+        .hour-block {
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.12) 0%, rgba(139, 58, 98, 0.08) 100%);
+        }
+
+        .hour-block p {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hour-block .label {
+            font-weight: 700;
+            color: var(--light-pink);
+            font-size: 1rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* Contact Section */
+        .hour-block .value {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+        }
+
+        /* Botón de Google Maps */
+        .location-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 1.2rem 2rem;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(66, 133, 244, 0.3);
+            margin-top: 1rem;
+            align-self: center;
+        }
+
+        .location-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(66, 133, 244, 0.5);
+        }
+
+        .location-btn i {
+            font-size: 1.3rem;
+        }
+
+        .location-info p {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: var(--text-light);
+            position: relative;
+            z-index: 1;
+            margin: 1.2rem 0;
+            font-weight: 400;
+        }
+
+        .location-info p i {
+            color: var(--accent-pink);
+            margin-right: 0.8rem;
+            font-size: 1.3rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        /* Minimal & Clean Location Section */
+        .location {
+            max-width: 1500px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            width: 95%;
+        }
+
+        .location h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            letter-spacing: 2px;
+            text-align: center;
+            animation: fadeInUp 1s ease;
+        }
+
+        .location-container {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        .map-container {
+            min-height: 280px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(212, 96, 140, 0.2);
+            overflow: hidden;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .location-info {
+            background: linear-gradient(135deg, rgba(45, 24, 35, 0.8), rgba(26, 13, 19, 0.9));
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(212, 96, 140, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .location-info::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 96, 140, 0.08) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Info container and lines */
+        .info-compact {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-line {
+            display: flex;
+            gap: 0.9rem;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            padding: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .info-line:hover {
+            background: rgba(212, 96, 140, 0.1);
+            transform: translateX(3px);
+        }
+
+        .info-line i {
+            font-size: 1.3rem;
+            color: var(--accent-pink);
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .info-line > div {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--light-pink);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 0.3rem 0;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* Location button - compact */
+        .location-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            padding: 0.8rem 1.2rem;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+            align-self: center;
+            margin-top: 0.5rem;
+        }
+
+        .location-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(66, 133, 244, 0.5);
+        }
+
+        .location-btn i {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .location-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .map-container {
+                min-height: 250px;
+            }
+            .location {
+                padding: 0.8rem;
+                margin: 1rem auto;
+            }
+            .location h2 {
+                font-size: 1.3rem;
+            }
+            .info-line {
+                padding: 0.6rem;
+                gap: 0.7rem;
+            }
+        }
+
+        /* Contact Section - Enhanced Footer */
         .contact {
             text-align: center;
-            padding: 3rem 2rem;
-            background: linear-gradient(135deg, var(--secondary-dark), var(--primary-dark));
+            padding: 5rem 2rem;
+            background: linear-gradient(180deg, 
+                rgba(26, 13, 19, 0.95) 0%, 
+                rgba(45, 24, 35, 0.9) 50%, 
+                rgba(26, 13, 19, 1) 100%);
             margin-top: 4rem;
+            margin-bottom: 0;
+            padding-bottom: 5rem;
             animation: fadeInUp 1s ease 1.3s both;
+            position: relative;
+            overflow: hidden;
+            border-top: 3px solid rgba(212, 96, 140, 0.3);
+        }
+
+
+        .contact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(212, 96, 140, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(212, 96, 140, 0.15) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .contact::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: var(--gradient-pink);
+            box-shadow: 0 0 20px var(--accent-pink);
         }
 
         .contact h2 {
             font-family: 'Permanent Marker', cursive;
             color: white;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9),
-                        0 0 20px var(--accent-pink);
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9),
+                        0 0 25px var(--accent-pink),
+                        0 0 50px rgba(212, 96, 140, 0.6),
+                        0 0 75px rgba(212, 96, 140, 0.3);
+            margin-bottom: 3rem;
+            font-size: 3.5rem;
+            position: relative;
+            z-index: 1;
+            animation: neonGlow 3s ease-in-out infinite;
+            letter-spacing: 3px;
         }
 
         .contact-buttons {
@@ -444,81 +1249,688 @@
         }
 
         .contact-btn {
-            padding: 1rem 2rem;
+            padding: 1.2rem 2.5rem;
             background: var(--gradient-pink);
             color: white;
             text-decoration: none;
             border-radius: 50px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-family: 'Oswald', sans-serif;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(212, 96, 140, 0.3);
+            gap: 0.8rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 20px rgba(212, 96, 140, 0.4),
+                        0 0 30px rgba(212, 96, 140, 0.2);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
         }
 
         .contact-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(212, 96, 140, 0.5);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(212, 96, 140, 0.6),
+                        0 0 50px rgba(212, 96, 140, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
-        /* Responsive */
+        .contact-btn i {
+            font-size: 1.4rem;
+        }
+
+        /* Care Section - Accordion */
+        .care-section {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            padding: 2rem;
+            text-align: center;
+            animation: fadeInUp 1s ease 0.4s both;
+            background: rgba(45, 24, 35, 0.5);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .care-section h2 {
+            font-family: 'Bebas Neue', cursive;
+            color: var(--accent-pink);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .care-content {
+            text-align: left;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .care-item {
+            background: rgba(212, 96, 140, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-pink);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .care-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .care-header:hover {
+            background: rgba(212, 96, 140, 0.15);
+        }
+
+        .care-header h3 {
+            font-family: 'Oswald', sans-serif;
+            color: var(--light-pink);
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            flex: 1;
+        }
+
+        .care-toggle {
+            font-size: 1.5rem;
+            color: var(--accent-pink);
+            transition: transform 0.3s ease;
+        }
+
+        .care-item.active .care-toggle {
+            transform: rotate(180deg);
+        }
+
+        .care-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 1.5rem;
+        }
+
+        .care-item.active .care-body {
+            max-height: 2000px;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        .care-item ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .care-item ul li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+
+        .care-item ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-pink);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .care-item p {
+            line-height: 1.8;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+        }
+
+        /* Consultation Section */
+        .consultation-section {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            padding: 2.5rem;
+            text-align: center;
+            animation: fadeInUp 1s ease 0.6s both;
+            background: linear-gradient(135deg, rgba(212, 96, 140, 0.2), rgba(139, 58, 98, 0.2));
+            border-radius: 20px;
+            border: 2px solid rgba(212, 96, 140, 0.3);
+        }
+
+        .consultation-section h2 {
+            font-family: 'Bebas Neue', cursive;
+            color: var(--accent-pink);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .consultation-section p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .consultation-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1.2rem 2.5rem;
+            background: var(--gradient-pink);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-family: 'Oswald', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(212, 96, 140, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .consultation-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 35px rgba(212, 96, 140, 0.6);
+        }
+
+        .consultation-btn i {
+            font-size: 1.5rem;
+        }
+
+        /* Responsive - Mobile First Approach */
         @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+
+            .header {
+                padding: 1rem 0.8rem;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: linear-gradient(135deg, #1a0d13 0%, #2d1823 50%, #1a0d13 100%);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            }
+
             h1 {
-                font-size: 2.5rem;
+                font-size: 1.8rem;
+                letter-spacing: 1px;
+                margin-bottom: 0.3rem;
+                line-height: 1.2;
+            }
+
+            .tagline {
+                font-size: 0.85rem;
+                letter-spacing: 1.5px;
+                margin-bottom: 0.8rem;
+            }
+
+            .logo-container {
+                width: 90px;
+                height: 90px;
+                margin: 0 auto 0.8rem;
+            }
+
+            .experience-badge {
+                font-size: 0.75rem;
+                padding: 0.35rem 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .social-links {
+                gap: 0.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .social-link {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .about, .care-section, .consultation-section {
+                padding: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .about h2, .care-section h2, .consultation-section h2 {
+                font-size: 1.6rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .care-header {
+                padding: 1rem;
+            }
+
+            .care-header h3 {
+                font-size: 1rem;
+            }
+
+            .care-toggle {
+                font-size: 1.2rem;
+            }
+
+            .about h2, .care-section h2, .consultation-section h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .about-item, .care-item {
+                padding: 1rem;
+            }
+
+            .about-item h3, .care-item h3 {
+                font-size: 1.1rem;
+            }
+
+            .about p, .care-item p, .consultation-section p {
+                font-size: 0.95rem;
+            }
+
+            .skill-tag {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .care-item ul li {
+                font-size: 0.9rem;
+                padding: 0.4rem 0;
+                padding-left: 1.2rem;
+            }
+
+            .gallery {
+                padding: 1rem 0.8rem;
+            }
+
+            .gallery h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.2rem;
             }
 
             .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .gallery-item {
+                border-radius: 10px;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            .gallery-item:hover {
+                transform: translateY(-3px);
+            }
+
+            .featured-reel {
+                padding: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .featured-reel h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .location {
+                padding: 1rem;
+                margin: 2rem auto;
+            }
+
+            .location h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .location-container {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .map-container {
+                height: 250px;
+                min-height: 250px;
+            }
+
+            .location-info {
+                padding: 1.5rem;
+                min-height: auto;
+                text-align: center;
+            }
+
+            .location-info h3 {
+                font-size: 1.2rem;
+            }
+
+            .location-info p {
+                font-size: 0.9rem;
+            }
+
+            .contact {
+                padding: 2rem 1rem;
+                margin-top: 2rem;
+            }
+
+            .contact h2 {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
             }
 
             .contact-buttons {
                 flex-direction: column;
                 align-items: center;
+                gap: 1rem;
             }
 
-            .about-content {
-                text-align: center;
+            .contact-btn {
+                width: 100%;
+                max-width: 300px;
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+                justify-content: center;
+            }
+
+            .consultation-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .consultation-section {
+                padding: 1.5rem;
+            }
+
+            .consultation-section p {
+                font-size: 1rem;
+            }
+
+            .collage-track {
+                display: none;
+            }
+
+            .decoration-left, .decoration-right {
+                display: none;
+            }
+
+            .collage-modal-content {
+                padding: 2rem 1.5rem;
+                max-width: 90%;
+            }
+
+            .collage-modal h3 {
+                font-size: 1.4rem;
+            }
+
+            .collage-modal-btn {
+                font-size: 1rem;
+                padding: 0.9rem 1.5rem;
             }
         }
 
-        /* Particles effect */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .logo-container {
+                width: 80px;
+                height: 80px;
+            }
+
+            .about h2, .care-section h2, .consultation-section h2, 
+            .gallery h2, .featured-reel h2, .location h2, .contact h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Particles effect - Enhanced */
         .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent-pink);
+            box-shadow: 0 0 10px var(--accent-pink),
+                        0 0 20px rgba(212, 96, 140, 0.5);
+            animation: float-particle 6s infinite linear;
+        }
+
+        .particle.small {
+            width: 3px;
+            height: 3px;
+            opacity: 0.6;
+        }
+
+        .particle.medium {
+            width: 5px;
+            height: 5px;
+            opacity: 0.7;
+        }
+
+        .particle.large {
+            width: 7px;
+            height: 7px;
+            opacity: 0.8;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(calc(100vh + 300px)) translateX(calc(var(--offset-x, 0px) * 0)) scale(0.5);
+                opacity: 0;
+            }
+            2% {
+                opacity: 1;
+            }
+            98% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(-100vh - 300px)) translateX(calc(var(--offset-x, 0px) * 1.5)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Side Decorations - Enhanced */
+        .side-decorations {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
+            overflow: hidden;
         }
 
-        .particle {
+        .decoration-left, .decoration-right {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--accent-pink);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float-particle 10s infinite linear;
+            width: 400px;
+            height: 100%;
+            top: 0;
         }
 
-        @keyframes float-particle {
-            from {
-                transform: translateY(100vh) scale(0);
+        .decoration-left {
+            left: -200px;
+        }
+
+        .decoration-right {
+            right: -200px;
+        }
+
+        .decoration-shape {
+            position: absolute;
+            opacity: 0.15;
+            animation: float 15s ease-in-out infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Decoraciones izquierda - Formas diferentes */
+        .decoration-left .decoration-shape.shape-1 {
+            width: 200px;
+            height: 200px;
+            border: 3px solid var(--accent-pink);
+            border-radius: 50%;
+            top: 10%;
+            left: 30px;
+            animation-delay: 0s;
+            box-shadow: 0 0 25px rgba(212, 96, 140, 0.2);
             }
-            to {
-                transform: translateY(-100vh) scale(1);
+
+        .decoration-left .decoration-shape.shape-2 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--accent-pink), var(--light-pink));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            top: 45%;
+            left: 50px;
+            animation-delay: 3s;
+            opacity: 0.2;
+        }
+
+        .decoration-left .decoration-shape.shape-3 {
+            width: 180px;
+            height: 80px;
+            border: 2px solid var(--light-pink);
+            border-radius: 50px;
+            top: 75%;
+            left: 40px;
+            animation-delay: 6s;
+            opacity: 0.15;
+        }
+
+        .decoration-left .decoration-shape.shape-4 {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--accent-pink) 30%, transparent 70%);
+            top: 30%;
+            left: 80px;
+            animation-delay: 4s;
+            opacity: 0.18;
+        }
+
+        /* Decoraciones derecha - Formas diferentes */
+        .decoration-right .decoration-shape.shape-1 {
+            width: 160px;
+            height: 160px;
+            border: 3px dashed var(--light-pink);
+            border-radius: 20px;
+            transform: rotate(30deg);
+            top: 15%;
+            right: 40px;
+            animation-delay: 2s;
+            opacity: 0.15;
+        }
+
+        .decoration-right .decoration-shape.shape-2 {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(45deg, transparent 30%, var(--accent-pink) 30%, var(--accent-pink) 70%, transparent 70%);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            top: 50%;
+            right: 60px;
+            animation-delay: 5s;
+            opacity: 0.2;
+        }
+
+        .decoration-right .decoration-shape.shape-3 {
+            width: 120px;
+            height: 200px;
+            border: 2px solid var(--accent-pink);
+            border-radius: 60px;
+            top: 70%;
+            right: 50px;
+            animation-delay: 7s;
+            opacity: 0.12;
+        }
+
+        .decoration-right .decoration-shape.shape-4 {
+            width: 90px;
+            height: 90px;
+            background: conic-gradient(from 0deg, var(--accent-pink), var(--light-pink), var(--accent-pink));
+            border-radius: 50%;
+            top: 25%;
+            right: 70px;
+            animation-delay: 1s;
+            opacity: 0.16;
+        }
+
+        @media (min-width: 1400px) {
+            .decoration-left {
+                left: -100px;
+            }
+            .decoration-right {
+                right: -100px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="scale-wrapper">
     <!-- Particles Background -->
     <div class="particles" id="particles"></div>
+    
+        <!-- Side Decorations -->
+    <div class="side-decorations">
+        <div class="decoration-left">
+            <div class="decoration-shape shape-1"></div>
+            <div class="decoration-shape shape-2"></div>
+            <div class="decoration-shape shape-3"></div>
+            <div class="decoration-shape shape-4"></div>
+        </div>
+        <div class="decoration-right">
+            <div class="decoration-shape shape-1"></div>
+            <div class="decoration-shape shape-2"></div>
+            <div class="decoration-shape shape-3"></div>
+            <div class="decoration-shape shape-4"></div>
+        </div>
+    </div>
+
+    <!-- Collage Modal -->
+    <div class="collage-modal" id="collageModal">
+        <div class="collage-modal-content">
+            <button class="collage-modal-close" onclick="closeCollageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3>¿Qué deseas hacer?</h3>
+            <div class="collage-modal-buttons">
+                <a href="https://www.instagram.com/nikavida.tattoo" 
+                   class="collage-modal-btn instagram" 
+                   target="_blank"
+                   onclick="closeCollageModal()">
+                    <i class="fab fa-instagram"></i>
+                    Ver en Instagram
+                </a>
+                <a href="https://www.google.com/maps/search/?api=1&query=2182+Soldado+Ex+Combatiente+de+Malvinas,+Los+Polvorines,+Buenos+Aires" 
+                   class="collage-modal-btn maps" 
+                   target="_blank"
+                   onclick="closeCollageModal()">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Ver Ubicación en Maps
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="header">
@@ -583,14 +1995,149 @@
         </div>
     </section>
 
+    <!-- Care Section -->
+    <section class="care-section">
+        <h2><i class="fas fa-heartbeat"></i> Cuidados del Tatuaje</h2>
+        <div class="care-content">
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-band-aid"></i> Primeras 2-4 Horas</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>Mantén la venda/plástico por 2-4 horas después del tatuaje</li>
+                        <li>No toques el tatuaje con las manos sucias</li>
+                        <li>Evita exponerlo al sol directo</li>
+                        <li>No apliques cremas aún, solo déjalo respirar</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-shower"></i> Limpieza Diaria (Primera Semana)</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>Lava suavemente con agua tibia y jabón neutro 2-3 veces al día</li>
+                        <li>Seca con papel toalla dando pequeños toques (no frotar)</li>
+                        <li>Aplica una capa fina de crema especial para tatuajes o vaselina</li>
+                        <li>Lava antes de dormir y al despertar</li>
+                        <li>Evita dejar el tatuaje húmedo por mucho tiempo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-oil-can"></i> Hidratación</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>Aplica crema 3-4 veces al día durante las primeras 2 semanas</li>
+                        <li>Usa crema específica para tatuajes o Bepanthen</li>
+                        <li>No uses cremas con perfumes, alcohol o parabenos</li>
+                        <li>La cantidad debe ser delgada, no excesiva</li>
+                        <li>Continúa hidratando diariamente después de sanar</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-ban"></i> Qué Evitar (Primeras 2 Semanas)</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>NO rasques ni arranques las costras (puede causar pérdida de color)</li>
+                        <li>NO sumerjas en piscinas, mar, jacuzzis o bañeras</li>
+                        <li>NO expongas al sol directo (usa protector FPS 50+ después de sanar)</li>
+                        <li>NO uses ropa ajustada que roce constantemente el tatuaje</li>
+                        <li>NO hagas ejercicio intenso que cause mucha sudoración</li>
+                        <li>NO uses saunas o vapor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-calendar-check"></i> Proceso de Curación</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>Días 1-3: Enrojecimiento e hinchazón normal, puede supurar un poco</li>
+                        <li>Días 4-7: Formación de costras finas, picazón leve (normal)</li>
+                        <li>Días 8-14: Costras se desprenden naturalmente, piel nueva debajo</li>
+                        <li>Días 15-30: Cicatrización completa, el tatuaje puede verse opaco</li>
+                        <li>Después de 1 mes: El tatuaje toma su apariencia final</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--light-pink); font-weight: 600;">
+                        ⚠️ Si notas enrojecimiento excesivo, pus, fiebre o dolor intenso, consulta a un médico inmediatamente.
+                    </p>
+                </div>
+            </div>
+
+            <div class="care-item">
+                <div class="care-header" onclick="toggleCare(this)">
+                    <h3><i class="fas fa-sun"></i> Cuidado a Largo Plazo</h3>
+                    <i class="fas fa-chevron-down care-toggle"></i>
+                </div>
+                <div class="care-body">
+                    <ul>
+                        <li>Usa protector solar FPS 50+ siempre que expongas el tatuaje al sol</li>
+                        <li>Hidrata la piel regularmente para mantener los colores vivos</li>
+                        <li>Evita exponer tatuajes nuevos al sol durante mínimo 1 mes</li>
+                        <li>Mantén una dieta saludable para mejorar la cicatrización</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Consultation Section -->
+    <section class="consultation-section">
+        <h2><i class="fas fa-comments"></i> ¿Tienes Consultas?</h2>
+        <p>
+            Si tienes dudas sobre el proceso, cuidados, diseño o quieres agendar una cita, 
+            no dudes en contactarme. Estoy aquí para ayudarte a crear el tatuaje perfecto.
+        </p>
+        <a href="https://www.instagram.com/nikavida.tattoo" 
+           class="consultation-btn" 
+           target="_blank">
+            <i class="fab fa-instagram"></i>
+            Enviar Consulta por Instagram
+        </a>
+        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--light-pink); opacity: 0.8;">
+            Haz clic en "Enviar mensaje" cuando se abra mi perfil
+        </p>
+    </section>
+
     <!-- Featured Reel -->
     <section class="featured-reel">
         <h2>Trabajo Destacado</h2>
+        <div class="reel-wrapper">
+            <div class="reel-background">
+                <div class="collage-carousel" id="collageCarouselCenter">
+                    <!-- Las fotos se generarán con JavaScript en círculo -->
+                </div>
+                <div class="collage-carousel carousel-top" id="collageCarouselTop">
+                    <!-- Las fotos se generarán con JavaScript en círculo -->
+                </div>
+                <div class="collage-carousel carousel-bottom" id="collageCarouselBottom">
+                    <!-- Las fotos se generarán con JavaScript en círculo -->
+                </div>
+            </div>
         <div class="reel-container">
             <video controls autoplay muted loop playsinline>
                 <source src="videon.mp4" type="video/mp4">
                 Tu navegador no soporta el elemento de video.
             </video>
+            </div>
         </div>
     </section>
 
@@ -599,7 +2146,7 @@
         <h2>Mis Trabajos</h2>
         <div class="gallery-grid">
             <!-- Trabajo 1 -->
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 1: Reemplaza con tu imagen -->
                 <img src="linea fina.jpg" class="gallery-img" alt="Diseño Lineal" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -611,7 +2158,7 @@
             </div>
 
             <!-- Trabajo 2 -->
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 2: Reemplaza con tu imagen -->
                 <img src="yo.jpeg" class="gallery-img" alt="Sombras y Detalles" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -623,7 +2170,7 @@
             </div>
 
             <!-- Trabajo 2 -->
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 2: Reemplaza con tu imagen -->
                 <img src="relleno.jpg" class="gallery-img" alt="Sombras y Detalles" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -635,7 +2182,7 @@
             </div>
 
             <!-- Trabajo 3 -->
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 3: Reemplaza con tu imagen -->
                 <img src="ciro.jpeg" class="gallery-img" alt="Arte Personalizado" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -646,7 +2193,7 @@
                 </div>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 3: Reemplaza con tu imagen -->
                 <img src="belen.jpeg" class="gallery-img" alt="Arte Personalizado" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -657,7 +2204,7 @@
                 </div>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 3: Reemplaza con tu imagen -->
                 <img src="propio2.jpeg" class="gallery-img" alt="Arte Personalizado" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -668,7 +2215,7 @@
                 </div>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 3: Reemplaza con tu imagen -->
                 <img src="m.jpeg" class="gallery-img" alt="Arte Personalizado" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -679,7 +2226,7 @@
                 </div>
             </div>
 
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN 3: Reemplaza con tu imagen -->
                 <img src="a.jpeg" class="gallery-img" alt="Arte Personalizado" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -691,7 +2238,7 @@
             </div>
 
             <!-- Tu diseño especial -->
-            <div class="gallery-item">
+            <div class="gallery-item" onclick="openCollageModal()">
                 <!-- CAMBIAR IMAGEN EXTRA: Pon aquí tu diseño propio -->
                 <img src="personalizado.jpg" class="gallery-img" alt="Diseño Especial" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="gallery-placeholder" style="display:none;">
@@ -704,29 +2251,47 @@
         </div>
     </section>
 
-    <!-- Location -->
+    <!-- Location - Minimal & Clean -->
     <section class="location">
-        <h2>Encuéntrame</h2>
-        <div class="map-container">
-            <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3285.7644!2d-58.706685!3d-34.496834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDI5JzQ4LjYiUyA1OMKwNDInMTYuMiJX!5e0!3m2!1ses!2sar!4v1234567890" 
-                width="100%" 
-                height="100%" 
-                style="border:0;" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
-        </div>
-        
-        <div class="location-info">
-            <h3><i class="fas fa-map-marker-alt"></i> Mi Estudio</h3>
-            <p class="address">2182 Soldado Ex Combatiente de Malvinas</p>
-            <p>Los Polvorines, Buenos Aires</p>
-            <p style="margin-top: 1rem;">
-                <i class="fas fa-clock"></i> Atención con cita previa<br>
-                <i class="fas fa-clock"></i> Horarios flexibles - Coordinamos según tu disponibilidad<br>
-            </p>
+        <h2><i class="fas fa-map-pin"></i> Encuéntrame</h2>
+        <div class="location-container">
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3285.7644!2d-58.706685!3d-34.496834!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDI5JzQ4LjYiUyA1OMKwNDInMTYuMiJX!5e0!3m2!1ses!2sar!4v1234567890" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+            
+            <div class="location-info">
+                <div class="info-compact">
+                    <div class="info-line">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <p class="info-label">Ubicación</p>
+                            <p class="info-value">2182 Soldado Ex Combatiente de Malvinas, Los Polvorines</p>
+                        </div>
+                    </div>
+
+                    <div class="info-line">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <p class="info-label">Horarios</p>
+                            <p class="info-value">Con cita previa - Flexibles según disponibilidad</p>
+                        </div>
+                    </div>
+
+                    <a href="https://www.google.com/maps/search/?api=1&query=2182+Soldado+Ex+Combatiente+de+Malvinas,+Los+Polvorines,+Buenos+Aires" 
+                       target="_blank" 
+                       class="location-btn">
+                        <i class="fas fa-directions"></i> Ver en Maps
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -744,16 +2309,104 @@
     </footer>
 
     <script>
-        // Crear partículas animadas
+        // Crear partículas animadas - Mejoradas y regenerativas
+        let particleCreationInterval = null;
+        
+        function createParticles() {
         const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 50; i++) {
+            if (!particlesContainer) return;
+            
+            // Limpiar contenedor solo en la primera creación
+            if (!particlesContainer.hasAttribute('data-initialized')) {
+                particlesContainer.innerHTML = '';
+                particlesContainer.setAttribute('data-initialized', 'true');
+            }
+            
+            const particleCount = 150; // Cantidad óptima
+            const viewportHeight = window.innerHeight;
+            
+            for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
-            particle.className = 'particle';
+                
+                // Asignar tamaño aleatorio
+                const size = Math.random();
+                if (size < 0.4) {
+                    particle.className = 'particle small';
+                } else if (size < 0.7) {
+                    particle.className = 'particle medium';
+                } else {
+                    particle.className = 'particle large';
+                }
+                
+                // Posición inicial aleatoria horizontal
             particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 10 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                
+                // Animación (5-12s para más fluidez)
+                const duration = 5 + Math.random() * 7;
+                particle.style.animationDuration = duration + 's';
+                
+                // Delay negativo para distribuir partículas en toda la altura
+                // Esto hace que algunas partículas empiecen a mitad de camino
+                const progress = Math.random(); // 0 a 1 - posición en la animación
+                const delay = -(progress * duration);
+                particle.style.animationDelay = delay + 's';
+                
+                // Offset horizontal para movimiento más natural
+                const horizontalOffset = (Math.random() - 0.5) * 80;
+                particle.style.setProperty('--offset-x', horizontalOffset + 'px');
+                
             particlesContainer.appendChild(particle);
+                
+                // Remover partícula cuando termine su animación
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, (duration - delay) * 1000);
+            }
         }
+
+        // Crear partículas iniciales
+        createParticles();
+
+        // Crear partículas continuamente cada 8 segundos (más fluido)
+        particleCreationInterval = setInterval(() => {
+            // Solo agregar nuevas partículas si no hay demasiadas
+            const particlesContainer = document.getElementById('particles');
+            if (particlesContainer && particlesContainer.children.length < 150) {
+                // Crear solo 30-40 partículas nuevas cada vez
+                const newParticles = 35;
+                for (let i = 0; i < newParticles; i++) {
+                    const particle = document.createElement('div');
+                    
+                    const size = Math.random();
+                    if (size < 0.4) {
+                        particle.className = 'particle small';
+                    } else if (size < 0.7) {
+                        particle.className = 'particle medium';
+                    } else {
+                        particle.className = 'particle large';
+                    }
+                    
+                    particle.style.left = Math.random() * 100 + '%';
+                    const duration = 5 + Math.random() * 7;
+                    particle.style.animationDuration = duration + 's';
+                    const progress = Math.random();
+                    const delay = -(progress * duration);
+                    particle.style.animationDelay = delay + 's';
+                    const horizontalOffset = (Math.random() - 0.5) * 80;
+                    particle.style.setProperty('--offset-x', horizontalOffset + 'px');
+                    
+                    particlesContainer.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, (duration - delay) * 1000);
+                }
+            }
+        }, 8000);
 
         // Animación suave al scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -766,15 +2419,158 @@
             });
         });
 
-        // Efecto parallax suave
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const particles = document.querySelector('.particles');
-            particles.style.transform = `translateY(${scrolled * 0.5}px)`;
+        // Limitar número máximo de partículas para evitar acumulación
+        setInterval(() => {
+            const particlesContainer = document.getElementById('particles');
+            if (particlesContainer && particlesContainer.children.length > 250) {
+                // Remover partículas más antiguas si hay demasiadas
+                const particles = Array.from(particlesContainer.children);
+                const toRemove = particles.length - 200;
+                for (let i = 0; i < toRemove; i++) {
+                    if (particles[i] && particles[i].parentNode) {
+                        particles[i].parentNode.removeChild(particles[i]);
+                    }
+                }
+            }
+        }, 3000);
+
+        // Función para toggle del acordeón de cuidados
+        function toggleCare(header) {
+            const careItem = header.parentElement;
+            const isActive = careItem.classList.contains('active');
+            
+            // Cerrar todos los demás items
+            document.querySelectorAll('.care-item').forEach(item => {
+                if (item !== careItem) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle del item actual
+            careItem.classList.toggle('active', !isActive);
+        }
+
+        // Funciones para el modal del collage
+        function openCollageModal() {
+            const modal = document.getElementById('collageModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeCollageModal() {
+            const modal = document.getElementById('collageModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('collageModal');
+            const modalContent = document.querySelector('.collage-modal-content');
+            if (modal && modal.classList.contains('active')) {
+                if (!modalContent.contains(event.target) && 
+                    !event.target.classList.contains('collage-img') &&
+                    !event.target.classList.contains('gallery-img') &&
+                    !event.target.closest('.gallery-item')) {
+                    closeCollageModal();
+                }
+            }
         });
 
-        // Intentar reproducir el video automáticamente
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCollageModal();
+            }
+        });
+
+        // Crear collage 3D circular
+        function create3DCollage(carouselId, radius, imageSet, delay = 0, offsetY = 0) {
+            const carousel = document.getElementById(carouselId);
+            if (!carousel) return;
+
+            const totalImages = imageSet.length;
+            const angleStep = (360 / totalImages) * (Math.PI / 180);
+
+            imageSet.forEach((src, index) => {
+                const item = document.createElement('div');
+                item.className = 'collage-item';
+
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = 'collage-img';
+                img.alt = 'Tatuaje';
+                img.onclick = openCollageModal;
+                img.onerror = function() {
+                    this.style.display = 'none';
+                };
+
+                item.appendChild(img);
+                carousel.appendChild(item);
+
+                // Calcular posición en círculo (plano horizontal)
+                const angle = index * angleStep;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+                const rotateY = (angle * 180 / Math.PI);
+
+                // Aplicar transformación 3D con offset Y para altura
+                item.style.transform = `translateX(${x}px) translateY(${offsetY}px) translateZ(${z}px) rotateY(${rotateY}deg)`;
+            });
+
+            // Aplicar delay si es necesario
+            if (delay > 0) {
+                carousel.style.animationDelay = `-${delay}s`;
+            }
+        }
+
+        function initAllCollages() {
+            const allImages = [
+                'linea fina.jpg',
+                'yo.jpeg',
+                'relleno.jpg',
+                'ciro.jpeg',
+                'belen.jpeg',
+                'propio2.jpeg',
+                'personalizado.jpg',
+                'm.jpeg',
+                'a.jpeg',
+                'linea fina.jpg',
+                'yo.jpeg',
+                'relleno.jpg',
+                'ciro.jpeg',
+                'belen.jpeg',
+                'propio2.jpeg',
+                'personalizado.jpg'
+            ];
+
+            // ═══════════════════════════════════════════════════════════
+            // 📏 TAMAÑO DEL RADIO DEL COLLAGE (qué tan lejos están las fotos del centro)
+            // ═══════════════════════════════════════════════════════════
+            const centerRadius = 500; /* 🔧 CAMBIA ESTE VALOR para hacer el collage del centro más grande (ej: 550, 600) o más pequeño (ej: 450, 400) */
+            const topBottomRadius = 480; /* 🔧 CAMBIA ESTE VALOR para hacer los collages superior e inferior más grandes (ej: 520, 560) o más pequeños (ej: 440, 400) */
+            
+            // Círculo superior - posición superior (12%)
+            const topImages = allImages.slice(0, 12);
+            create3DCollage('collageCarouselTop', topBottomRadius, topImages, 16, 0);
+
+            // Círculo central - centrado verticalmente (50%)
+            create3DCollage('collageCarouselCenter', centerRadius, allImages, 0, 0);
+
+            // Círculo inferior - posición inferior (88%)
+            const bottomImages = allImages.slice(4, 16);
+            create3DCollage('collageCarouselBottom', topBottomRadius, bottomImages, 33, 0);
+        }
+
+        // Inicializar cuando la página cargue
         window.addEventListener('load', function() {
+            initAllCollages();
+
+            // Intentar reproducir el video automáticamente
             const video = document.querySelector('video');
             if (video) {
                 video.play().catch(function(error) {
@@ -783,6 +2579,7 @@
             }
         });
     </script>
+    </div> <!-- .scale-wrapper -->
 </body>
 </html>
 
